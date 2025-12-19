@@ -1,0 +1,249 @@
+<section class="layout" aria-label="Punto de Venta">
+  <app-sidebar></app-sidebar>
+
+  <main class="content">
+    <header class="header" aria-label="Encabezado">
+      <div>
+        <h1 class="empresa">{{ empresa() }}</h1>
+        <div class="empresa-info">
+          <div><strong>RUC:</strong> {{ ruc() }}</div>
+          <div><strong>Dirección:</strong> {{ direccion() }}</div>
+          <div><strong>Teléfono:</strong> {{ telefono() }}</div>
+          <div><strong>Email:</strong> {{ email() }}</div>
+        </div>
+      </div>
+      <div class="fechas">
+        <label>
+          Fecha Emisión
+          <input type="date" [ngModel]="fechaEmision()" (ngModelChange)="fechaEmision.set($event)" />
+        </label>
+        <label>
+          Fecha Vencimiento
+          <input type="date" [ngModel]="fechaVencimiento()" (ngModelChange)="fechaVencimiento.set($event)" />
+        </label>
+      </div>
+    </header>
+
+    <section class="form" aria-label="Datos del comprobante">
+      <div class="form-section-title">Datos del Comprobante</div>
+      <label>
+        Tipo Comprobante *
+        <select [ngModel]="tipoComprobante()" (ngModelChange)="tipoComprobante.set($event)">
+          <option value="Factura">Factura</option>
+          <option value="Boleta">Boleta</option>
+        </select>
+      </label>
+      <label>
+        Serie *
+        <input type="text" [ngModel]="serie()" (ngModelChange)="serie.set($event)" required />
+      </label>
+      <label>
+        Número *
+        <input type="text" [ngModel]="numero()" (ngModelChange)="numero.set($event)" required />
+      </label>
+      <label>
+        Tipo Operación *
+        <select [ngModel]="tipoOperacion()" (ngModelChange)="tipoOperacion.set($event)">
+          <option value="Venta">Venta</option>
+          <option value="Servicio">Servicio</option>
+          <option value="Nota">Nota</option>
+        </select>
+      </label>
+      <label>
+        Moneda *
+        <select [ngModel]="moneda()" (ngModelChange)="moneda.set($event)">
+          <option value="PEN">Soles (PEN)</option>
+          <option value="USD">Dólares (USD)</option>
+        </select>
+      </label>
+      <label>
+        Tipo de Cambio
+        <input type="number" step="0.01" min="0" [ngModel]="tipoCambio()" (ngModelChange)="tipoCambio.set($event)" />
+      </label>
+      <label>
+        Forma de Pago *
+        <select [ngModel]="formaPago()" (ngModelChange)="formaPago.set($event)">
+          <option value="Contado">Contado</option>
+          <option value="Credito">Crédito</option>
+        </select>
+      </label>
+      <label class="observaciones">
+        Observaciones
+        <textarea rows="3" [ngModel]="observaciones()" (ngModelChange)="observaciones.set($event)" placeholder="Observaciones adicionales..."></textarea>
+      </label>
+    </section>
+
+    <section class="cliente-selector card">
+      <div class="form-section-title" style="margin: 0 0 16px 0;">Datos del Cliente</div>
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px;">
+        <label>
+          Buscar Cliente
+          <input type="text" placeholder="Nombre, documento..." [ngModel]="termCliente()" (ngModelChange)="termCliente.set($event)" />
+        </label>
+        <label>
+          Tipo Documento
+          <select [ngModel]="tipoDocCliente()" (ngModelChange)="tipoDocCliente.set($event)">
+            <option value="">Todos</option>
+            <option value="DNI">DNI</option>
+            <option value="RUC">RUC</option>
+            <option value="CE">CE</option>
+          </select>
+        </label>
+      </div>
+      <div *ngIf="clientesFiltrados().length > 0" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px;">
+        <div *ngFor="let c of clientesFiltrados()" 
+             style="padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer;"
+             (click)="selectCliente(c)"
+             [style.background]="selectedCliente()?.id === c.id ? 'var(--primary)' : 'transparent'"
+             [style.color]="selectedCliente()?.id === c.id ? 'var(--primary-contrast)' : 'var(--fg)'">
+          <div style="font-weight: 600;">{{ c.nombre }}</div>
+          <div class="muted" style="font-size: 0.875rem;">{{ c.tipoDocumento }}: {{ c.numeroDocumento }}</div>
+        </div>
+      </div>
+      <div *ngIf="selectedCliente()" class="cliente-info">
+        <div><strong>Cliente:</strong> {{ cliente() }}</div>
+        <div><strong>Documento:</strong> {{ clienteDocumento() }}</div>
+        <div *ngIf="clienteDireccion()"><strong>Dirección:</strong> {{ clienteDireccion() }}</div>
+      </div>
+      <div *ngIf="!selectedCliente()" style="padding: 12px; background: var(--surface); border-radius: var(--radius);">
+        <label>
+          Cliente (Manual)
+          <input type="text" [ngModel]="cliente()" (ngModelChange)="cliente.set($event)" placeholder="Nombre del cliente" />
+        </label>
+        <label style="margin-top: 12px;">
+          Documento
+          <input type="text" [ngModel]="clienteDocumento()" (ngModelChange)="clienteDocumento.set($event)" placeholder="DNI, RUC, etc." />
+        </label>
+      </div>
+    </section>
+
+    <section class="busqueda" aria-label="Búsqueda de productos">
+      <div class="form-section-title" style="margin: 0 0 16px 0;">Búsqueda de Productos</div>
+      <div class="busqueda__row">
+        <label class="w-100">
+          Buscar Producto
+          <input type="text" placeholder="Nombre o código interno del producto" [ngModel]="term()" (ngModelChange)="term.set($event)" aria-controls="lista-productos" />
+        </label>
+        <button class="btn btn--secondary" type="button">Buscar</button>
+      </div>
+      <ng-container *ngIf="filtered().length; else noResultados">
+        <ul id="lista-productos" role="listbox" aria-label="Resultados" class="listbox">
+          <li *ngFor="let p of filtered()" role="option">
+            <div class="listbox__row">
+              <div>
+                <div class="producto__nombre">{{ p.nombre }}</div>
+                <div class="producto__codigo">Código: {{ p.codigoInterno }} | Unidad: {{ p.unidad }}</div>
+              </div>
+              <div>
+                <div style="font-weight: 600; color: var(--primary);">Precio 1: S/ {{ p.precio1 | number:'1.2-2' }}</div>
+                <div style="font-weight: 600; color: var(--success);">Precio 2: S/ {{ p.precio2 | number:'1.2-2' }}</div>
+                <div *ngIf="p.precio3" style="font-weight: 600; color: var(--info);">Precio 3: S/ {{ p.precio3 | number:'1.2-2' }}</div>
+              </div>
+              <div>
+                <span class="badge" [class.badge--success]="p.tieneIGV" [class.badge--muted]="!p.tieneIGV">
+                  {{ p.tieneIGV ? 'Con IGV' : 'Sin IGV' }}
+                </span>
+                <div *ngIf="p.stock !== undefined" style="margin-top: 4px; font-size: 0.875rem;">
+                  Stock: <strong>{{ p.stock }}</strong>
+                </div>
+              </div>
+              <button class="btn btn--primary" type="button" (click)="addItemFromProduct(p)" aria-label="Agregar {{p.nombre}}">Agregar</button>
+            </div>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-template #noResultados>
+        <div class="callout" role="status" aria-live="polite">No se encontraron productos que coincidan con "{{ term() }}".</div>
+      </ng-template>
+    </section>
+
+    <section class="items" aria-label="Ítems del comprobante">
+      <div class="form-section-title" style="margin: 0 0 16px 0;">Ítems del Comprobante</div>
+      <ng-container *ngIf="items().length; else vacio">
+        <div class="table card" role="table" aria-label="Lista de ítems">
+          <div class="row header" role="row">
+            <div role="columnheader">Código</div>
+            <div role="columnheader">Descripción</div>
+            <div role="columnheader">Unidad</div>
+            <div role="columnheader">Cantidad</div>
+            <div role="columnheader">Valor Unit.</div>
+            <div role="columnheader">Precio Unit.</div>
+            <div role="columnheader">Descuento %</div>
+            <div role="columnheader">Subtotal</div>
+            <div role="columnheader">IGV</div>
+            <div role="columnheader">Total</div>
+            <div role="columnheader">Acciones</div>
+          </div>
+          <div class="row" role="row" *ngFor="let it of items(); let i = index" [class.alt]="i % 2 === 1">
+            <div role="cell" style="font-weight: 600; font-size: 0.8125rem;">{{ it.codigoInterno }}</div>
+            <div role="cell" style="font-weight: 500;">{{ it.nombre }}</div>
+            <div role="cell">{{ it.unidad }}</div>
+            <div role="cell">
+              <input type="number" step="1" min="1" [ngModel]="it.cantidad" (ngModelChange)="updateCantidad(it.id, +$event)" style="width: 80px;" />
+            </div>
+            <div role="cell">
+              <input type="number" step="0.01" min="0.01" [ngModel]="it.valorUnitario" (ngModelChange)="updateValorUnitario(it.id, +$event)" style="width: 100px;" />
+            </div>
+            <div role="cell">
+              <input type="number" step="0.01" min="0.01" [ngModel]="it.precioUnitario" (ngModelChange)="updatePrecioUnitario(it.id, +$event)" style="width: 100px;" />
+            </div>
+            <div role="cell">
+              <input type="number" step="0.01" min="0" max="100" [ngModel]="(it.descuento / it.subtotal * 100) || 0" (ngModelChange)="updateDescuento(it.id, +$event)" style="width: 80px;" />
+            </div>
+            <div role="cell" style="font-weight: 600;">S/ {{ it.subtotal | number:'1.2-2' }}</div>
+            <div role="cell">
+              <span *ngIf="it.tieneIGV" style="color: var(--success); font-weight: 600;">S/ {{ it.igv | number:'1.2-2' }}</span>
+              <span *ngIf="!it.tieneIGV" class="muted">—</span>
+            </div>
+            <div role="cell" style="font-weight: 700; color: var(--primary);">S/ {{ it.total | number:'1.2-2' }}</div>
+            <div role="cell">
+              <button class="btn btn--danger btn--small" type="button" (click)="removeItem(it.id)" aria-label="Eliminar {{it.nombre}}">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #vacio>
+        <div class="callout" role="status" aria-live="polite">No hay ítems agregados. Busque y agregue productos desde la sección de búsqueda.</div>
+      </ng-template>
+    </section>
+
+    <section class="totales" aria-live="polite" aria-atomic="true">
+      <div class="form-section-title" style="margin: 0 0 16px 0; border: none; padding: 0;">Resumen de Totales</div>
+      <div class="totales__line">
+        <span><strong>Subtotal:</strong></span>
+        <span style="font-weight: 600;">S/ {{ subtotal() | number:'1.2-2' }}</span>
+      </div>
+      <div class="totales__line">
+        <span><strong>Descuentos:</strong></span>
+        <span style="color: var(--danger); font-weight: 600;">- S/ {{ totalDescuentos() | number:'1.2-2' }}</span>
+      </div>
+      <div class="totales__line">
+        <label style="flex-direction: row; align-items: center; gap: 12px; margin: 0;">
+          <span><strong>Descuento Global (%):</strong></span>
+          <input type="number" step="0.01" min="0" max="100" [ngModel]="descuentoGlobal()" (ngModelChange)="descuentoGlobal.set(+$event)" style="width: 100px; min-height: 36px;" />
+        </label>
+      </div>
+      <div class="totales__line">
+        <span><strong>Base Imponible:</strong></span>
+        <span style="font-weight: 600;">S/ {{ baseImponible() | number:'1.2-2' }}</span>
+      </div>
+      <div class="totales__line">
+        <span><strong>IGV (18%):</strong></span>
+        <span style="color: var(--success); font-weight: 600;">S/ {{ igv() | number:'1.2-2' }}</span>
+      </div>
+      <div class="totales__line">
+        <span><strong>TOTAL A PAGAR:</strong></span>
+        <span style="font-size: 1.75rem; font-weight: 700; color: var(--primary);">S/ {{ totalPago() | number:'1.2-2' }}</span>
+      </div>
+      <div class="sr-only" [textContent]="liveMessage()"></div>
+    </section>
+
+    <section class="acciones" aria-label="Acciones principales">
+      <button class="btn btn--secondary" type="button" (click)="nuevaVenta()">Nueva Venta</button>
+      <button class="btn btn--secondary" type="button">Consultar Ventas</button>
+      <button class="btn btn--secondary" type="button">Reportes</button>
+      <button class="btn btn--success" type="button" (click)="guardarVenta()">Guardar Venta</button>
+      <button class="btn btn--primary" type="button" (click)="imprimir()">Imprimir Comprobante</button>
+    </section>
+  </main>
+</section>

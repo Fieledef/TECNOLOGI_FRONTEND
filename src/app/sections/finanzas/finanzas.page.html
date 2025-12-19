@@ -1,0 +1,85 @@
+<section class="layout" aria-label="Panel de Finanzas">
+  <app-sidebar></app-sidebar>
+  <main class="content">
+    <header class="header">
+      <div>
+        <h1>Finanzas</h1>
+        <small class="muted">Dashboard financiero y reportes</small>
+      </div>
+    </header>
+
+    <section class="dashboard">
+      <div class="dashboard-grid">
+        <div class="card stat-card stat-card--success">
+          <div class="stat-card__icon">💰</div>
+          <div class="stat-card__content">
+            <div class="stat-card__label">Total Ventas</div>
+            <div class="stat-card__value">S/ {{ totalVentas() | number:'1.2-2' }}</div>
+          </div>
+        </div>
+
+        <div class="card stat-card stat-card--danger">
+          <div class="stat-card__icon">🛒</div>
+          <div class="stat-card__content">
+            <div class="stat-card__label">Total Compras</div>
+            <div class="stat-card__value">S/ {{ totalCompras() | number:'1.2-2' }}</div>
+          </div>
+        </div>
+
+        <div class="card stat-card stat-card--info">
+          <div class="stat-card__icon">📊</div>
+          <div class="stat-card__content">
+            <div class="stat-card__label">Utilidad Bruta</div>
+            <div class="stat-card__value">S/ {{ utilidadBruta() | number:'1.2-2' }}</div>
+          </div>
+        </div>
+
+        <div class="card stat-card stat-card--warning">
+          <div class="stat-card__icon">💵</div>
+          <div class="stat-card__content">
+            <div class="stat-card__label">Flujo de Caja</div>
+            <div class="stat-card__value">S/ {{ flujoCaja() | number:'1.2-2' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr; margin-top: 24px;">
+        <div class="card">
+          <h3 style="margin: 0 0 16px 0; font-size: 1.25rem;">Resumen de Ventas</h3>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--surface); border-radius: var(--radius);">
+              <span>Total Ventas:</span>
+              <strong>S/ {{ totalVentas() | number:'1.2-2' }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--surface); border-radius: var(--radius);">
+              <span>Ventas Pagadas:</span>
+              <strong style="color: var(--success);">S/ {{ ventasPagadas() | number:'1.2-2' }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--surface); border-radius: var(--radius);">
+              <span>Ventas Pendientes:</span>
+              <strong style="color: var(--warning);">S/ {{ (totalVentas() - ventasPagadas()) | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin: 0 0 16px 0; font-size: 1.25rem;">Resumen de Compras</h3>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--surface); border-radius: var(--radius);">
+              <span>Total Compras:</span>
+              <strong>S/ {{ totalCompras() | number:'1.2-2' }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--surface); border-radius: var(--radius);">
+              <span>Compras Pagadas:</span>
+              <strong style="color: var(--success);">S/ {{ comprasPagadas() | number:'1.2-2' }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: var(--surface); border-radius: var(--radius);">
+              <span>Compras Pendientes:</span>
+              <strong style="color: var(--warning);">S/ {{ (totalCompras() - comprasPagadas()) | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</section>

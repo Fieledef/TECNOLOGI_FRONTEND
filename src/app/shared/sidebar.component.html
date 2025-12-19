@@ -1,0 +1,13 @@
+<nav class="sidebar" aria-label="Menú principal" [class.is-collapsed]="!expanded()">
+  <button class="sidebar__toggle" [attr.aria-expanded]="expanded()" aria-controls="sidebar-list" (click)="expanded.set(!expanded())">≡</button>
+  <ul id="sidebar-list" class="sidebar__list" role="menubar" [attr.aria-hidden]="!expanded()">
+    <li role="none"><a routerLink="/" routerLinkActive="active" aria-current="page" role="menuitem" tabindex="0">POS</a></li>
+    <li role="none"><a routerLink="/ventas" routerLinkActive="active" role="menuitem" tabindex="0">Ventas</a></li>
+    <li role="none"><a routerLink="/productos" routerLinkActive="active" role="menuitem" tabindex="0">Productos/Servicios</a></li>
+    <li role="none"><a routerLink="/almacenes" routerLinkActive="active" role="menuitem" tabindex="0">Almacenes</a></li>
+    <li role="none"><a routerLink="/clientes" routerLinkActive="active" role="menuitem" tabindex="0">Clientes</a></li>
+    <li role="none"><a routerLink="/proveedores" routerLinkActive="active" role="menuitem" tabindex="0">Proveedores</a></li>
+    <li role="none"><a routerLink="/compras" routerLinkActive="active" role="menuitem" tabindex="0">Compras</a></li>
+    <li role="none"><a routerLink="/finanzas" routerLinkActive="active" role="menuitem" tabindex="0">Finanzas</a></li>
+  </ul>
+</nav>

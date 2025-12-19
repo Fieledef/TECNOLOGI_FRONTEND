@@ -1,0 +1,144 @@
+<section class="layout" aria-label="Gestión de Compras">
+  <app-sidebar></app-sidebar>
+  <main class="content">
+    <header class="header">
+      <div>
+        <h1>Compras</h1>
+        <small class="muted">Historial y gestión de compras</small>
+      </div>
+      <div class="acciones">
+        <div style="display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: var(--surface); border-radius: var(--radius);">
+          <strong>Total: S/ {{ totalCompras() | number:'1.2-2' }}</strong>
+        </div>
+        <button class="btn btn--primary" type="button">+ Nueva Compra</button>
+      </div>
+    </header>
+
+    <section class="filtros card">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div>
+          <label>
+            Buscar
+            <input type="text" placeholder="Proveedor, serie o número..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Estado
+            <select [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+              <option value="todos">Todos</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="pagado">Pagados</option>
+              <option value="anulado">Anulados</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
+            Fecha Desde
+            <input type="date" [ngModel]="fechaDesde()" (ngModelChange)="fechaDesde.set($event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Fecha Hasta
+            <input type="date" [ngModel]="fechaHasta()" (ngModelChange)="fechaHasta.set($event)" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="tabla" aria-label="Lista de compras">
+      <ng-container *ngIf="filtered().length; else vacio">
+        <div class="table card">
+          <div class="row header">
+            <div>Comprobante</div>
+            <div>Fecha</div>
+            <div>Proveedor</div>
+            <div>Moneda</div>
+            <div>Subtotal</div>
+            <div>IGV</div>
+            <div>Total</div>
+            <div>Estado</div>
+            <div>Acciones</div>
+          </div>
+          <div class="row" *ngFor="let c of filtered(); let i = index" [class.alt]="i % 2 === 1">
+            <div>
+              <div style="font-weight: 600;">Factura</div>
+              <div class="muted" style="font-size: 0.875rem;">{{ c.serie }}-{{ c.numero }}</div>
+            </div>
+            <div>{{ c.fecha }}</div>
+            <div>
+              <div style="font-weight: 500;">{{ c.proveedorNombre }}</div>
+            </div>
+            <div>{{ c.moneda }}</div>
+            <div>S/ {{ c.subtotal | number:'1.2-2' }}</div>
+            <div>S/ {{ c.igv | number:'1.2-2' }}</div>
+            <div style="font-weight: 600; font-size: 1.1rem;">S/ {{ c.total | number:'1.2-2' }}</div>
+            <div>
+              <span class="badge" 
+                [class.badge--success]="c.estado === 'pagado'"
+                [class.badge--warning]="c.estado === 'pendiente'"
+                [class.badge--danger]="c.estado === 'anulado'">
+                {{ c.estado === 'pagado' ? 'Pagado' : c.estado === 'pendiente' ? 'Pendiente' : 'Anulado' }}
+              </span>
+            </div>
+            <div>
+              <button class="btn btn--secondary" type="button" (click)="verDetalle(c)">Ver</button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #vacio>
+        <div class="callout" role="status">No hay compras que coincidan con la búsqueda.</div>
+      </ng-template>
+    </section>
+  </main>
+</section>
+
+<div class="modal-overlay" *ngIf="selectedCompra()" (click)="cerrarDetalle()">
+  <div class="modal modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Detalle de Compra: {{ selectedCompra()?.serie }}-{{ selectedCompra()?.numero }}</h2>
+      <button class="btn btn--secondary" type="button" (click)="cerrarDetalle()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedCompra() as compra">
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+        <div>
+          <strong>Proveedor:</strong> {{ compra.proveedorNombre }}
+        </div>
+        <div>
+          <strong>Fecha:</strong> {{ compra.fecha }}
+        </div>
+        <div>
+          <strong>Moneda:</strong> {{ compra.moneda }}
+        </div>
+      </div>
+      <div class="table">
+        <div class="row header">
+          <div>Producto</div>
+          <div>Cantidad</div>
+          <div>Precio Unit.</div>
+          <div>Subtotal</div>
+        </div>
+        <div class="row" *ngFor="let item of compra.items">
+          <div>{{ item.productoNombre }}</div>
+          <div>{{ item.cantidad }}</div>
+          <div>S/ {{ item.precioUnitario | number:'1.2-2' }}</div>
+          <div>S/ {{ item.subtotal | number:'1.2-2' }}</div>
+        </div>
+      </div>
+      <div style="margin-top: 24px; padding-top: 24px; border-top: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="margin-bottom: 8px;"><strong>Subtotal:</strong> S/ {{ compra.subtotal | number:'1.2-2' }}</div>
+          <div style="margin-bottom: 8px;"><strong>IGV (18%):</strong> S/ {{ compra.igv | number:'1.2-2' }}</div>
+          <div style="font-size: 1.25rem; font-weight: 600;"><strong>Total:</strong> S/ {{ compra.total | number:'1.2-2' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" type="button" (click)="cerrarDetalle()">Cerrar</button>
+      <button class="btn btn--primary" type="button">Imprimir</button>
+    </div>
+  </div>
+</div>

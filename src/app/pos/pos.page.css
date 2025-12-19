@@ -1,0 +1,206 @@
+@import '../shared/shared.css';
+
+.empresa {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--fg);
+  letter-spacing: -0.5px;
+}
+
+.empresa-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--fg-muted);
+}
+
+.fechas {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}
+
+.form .observaciones {
+  grid-column: 1 / -1;
+}
+
+.form-section-title {
+  grid-column: 1 / -1;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.busqueda__row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.listbox {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 350px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+
+.listbox__row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.listbox__row:last-child {
+  border-bottom: none;
+}
+
+.listbox__row:hover {
+  background: var(--surface);
+}
+
+.producto__nombre {
+  font-weight: 600;
+  color: var(--fg);
+  font-size: 0.9375rem;
+}
+
+.producto__codigo {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.producto__precio {
+  justify-self: end;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary);
+}
+
+.table .row {
+  grid-template-columns: 0.6fr 2fr 1fr 1.2fr 1.2fr 1fr 1fr 1fr auto;
+  font-size: 0.875rem;
+}
+
+.table .row.header {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+}
+
+.totales {
+  margin-top: 24px;
+  padding: 24px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}
+
+.totales__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 12px 0;
+  padding: 10px 0;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.totales__line:last-child {
+  border-bottom: none;
+  border-top: 2px solid var(--primary);
+  padding-top: 16px;
+  margin-top: 16px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.items {
+  margin-bottom: 24px;
+}
+
+.acciones {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}
+
+.cliente-selector {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}
+
+.cliente-info {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  border-left: 4px solid var(--primary);
+}
+
+.cliente-selector > div > div {
+  transition: background-color 0.2s ease;
+}
+
+.cliente-selector > div > div:hover {
+  background: var(--surface) !important;
+}
+
+@media (max-width: 960px) {
+  .form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .table .row {
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr 1fr 1fr 1fr auto;
+  }
+}

@@ -1,0 +1,161 @@
+<section class="layout" aria-label="Gestión de Ventas">
+  <app-sidebar></app-sidebar>
+  <main class="content">
+    <header class="header">
+      <div>
+        <h1>Ventas</h1>
+        <small class="muted">Historial y gestión de ventas realizadas</small>
+      </div>
+      <div class="acciones">
+        <div class="header-stats">
+          <div class="stat-item">
+            <span class="stat-label">Total Ventas</span>
+            <span class="stat-value">S/ {{ totalVentas() | number:'1.2-2' }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Cantidad</span>
+            <span class="stat-value">{{ filtered().length }}</span>
+          </div>
+        </div>
+        <button class="btn btn--primary" type="button" routerLink="/">Nueva Venta</button>
+      </div>
+    </header>
+
+    <section class="filtros card">
+      <div class="form-section-title" style="margin: 0 0 16px 0;">Filtros de Búsqueda</div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+        <div>
+          <label>
+            Buscar
+            <input type="text" placeholder="Cliente, serie o número..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Estado
+            <select [ngModel]="estadoFiltro()" (ngModelChange)="estadoFiltro.set($event)">
+              <option value="todos">Todos los Estados</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="pagado">Pagados</option>
+              <option value="anulado">Anulados</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
+            Fecha Desde
+            <input type="date" [ngModel]="fechaDesde()" (ngModelChange)="fechaDesde.set($event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Fecha Hasta
+            <input type="date" [ngModel]="fechaHasta()" (ngModelChange)="fechaHasta.set($event)" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="tabla" aria-label="Lista de ventas">
+      <ng-container *ngIf="filtered().length; else vacio">
+        <div class="table card">
+          <div class="row header">
+            <div>Comprobante</div>
+            <div>Fecha</div>
+            <div>Cliente</div>
+            <div>Tipo</div>
+            <div>Moneda</div>
+            <div>Subtotal</div>
+            <div>IGV</div>
+            <div>Total</div>
+            <div>Estado</div>
+            <div>Acciones</div>
+          </div>
+          <div class="row" *ngFor="let v of filtered(); let i = index" [class.alt]="i % 2 === 1">
+            <div>
+              <div style="font-weight: 700; font-size: 0.875rem;">{{ v.tipoComprobante }}</div>
+              <div class="muted" style="font-size: 0.8125rem;">{{ v.serie }}-{{ v.numero }}</div>
+            </div>
+            <div style="font-size: 0.875rem;">{{ v.fecha }}</div>
+            <div>
+              <div style="font-weight: 600;">{{ v.clienteNombre }}</div>
+            </div>
+            <div>{{ v.tipoComprobante }}</div>
+            <div>{{ v.moneda }}</div>
+            <div style="font-weight: 600;">S/ {{ v.subtotal | number:'1.2-2' }}</div>
+            <div style="font-weight: 600; color: var(--success);">S/ {{ v.igv | number:'1.2-2' }}</div>
+            <div style="font-weight: 700; font-size: 1.125rem; color: var(--primary);">S/ {{ v.total | number:'1.2-2' }}</div>
+            <div>
+              <span class="badge" 
+                [class.badge--success]="v.estado === 'pagado'"
+                [class.badge--warning]="v.estado === 'pendiente'"
+                [class.badge--danger]="v.estado === 'anulado'">
+                {{ v.estado === 'pagado' ? 'Pagado' : v.estado === 'pendiente' ? 'Pendiente' : 'Anulado' }}
+              </span>
+            </div>
+            <div>
+              <button class="btn btn--secondary btn--small" type="button" (click)="verDetalle(v)">Ver Detalle</button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #vacio>
+        <div class="callout" role="status">No hay ventas que coincidan con los filtros seleccionados.</div>
+      </ng-template>
+    </section>
+  </main>
+</section>
+
+<div class="modal-overlay" *ngIf="selectedVenta()" (click)="cerrarDetalle()">
+  <div class="modal modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Detalle de Venta: {{ selectedVenta()?.serie }}-{{ selectedVenta()?.numero }}</h2>
+      <button class="btn btn--secondary" type="button" (click)="cerrarDetalle()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedVenta() as venta">
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; padding: 20px; background: var(--surface); border-radius: var(--radius-md);">
+        <div>
+          <div style="margin-bottom: 8px;"><strong>Cliente:</strong> {{ venta.clienteNombre }}</div>
+          <div style="margin-bottom: 8px;"><strong>Fecha:</strong> {{ venta.fecha }}</div>
+        </div>
+        <div>
+          <div style="margin-bottom: 8px;"><strong>Tipo:</strong> {{ venta.tipoComprobante }}</div>
+          <div style="margin-bottom: 8px;"><strong>Moneda:</strong> {{ venta.moneda }}</div>
+        </div>
+      </div>
+      <div class="table">
+        <div class="row header">
+          <div>Producto</div>
+          <div>Cantidad</div>
+          <div>Precio Unit.</div>
+          <div>Subtotal</div>
+        </div>
+        <div class="row" *ngFor="let item of venta.items">
+          <div style="font-weight: 500;">{{ item.productoNombre }}</div>
+          <div>{{ item.cantidad }}</div>
+          <div>S/ {{ item.precioUnitario | number:'1.2-2' }}</div>
+          <div style="font-weight: 600;">S/ {{ item.subtotal | number:'1.2-2' }}</div>
+        </div>
+      </div>
+      <div style="margin-top: 24px; padding: 20px; background: var(--surface); border-radius: var(--radius-md); border: 2px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+          <strong>Subtotal:</strong>
+          <strong>S/ {{ venta.subtotal | number:'1.2-2' }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+          <strong>IGV (18%):</strong>
+          <strong style="color: var(--success);">S/ {{ venta.igv | number:'1.2-2' }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 700; color: var(--primary); padding-top: 12px;">
+          <strong>TOTAL:</strong>
+          <strong>S/ {{ venta.total | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" type="button" (click)="cerrarDetalle()">Cerrar</button>
+      <button class="btn btn--success" type="button">Marcar como Pagado</button>
+      <button class="btn btn--primary" type="button">Imprimir Comprobante</button>
+    </div>
+  </div>
+</div>

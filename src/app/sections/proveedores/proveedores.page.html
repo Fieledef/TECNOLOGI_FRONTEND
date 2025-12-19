@@ -1,0 +1,167 @@
+<section class="layout" aria-label="Gestión de Proveedores">
+  <app-sidebar></app-sidebar>
+  <main class="content">
+    <header class="header">
+      <div>
+        <h1>Proveedores</h1>
+        <small class="muted">Gestión de proveedores y compras</small>
+      </div>
+      <div class="acciones">
+        <button class="btn btn--secondary" type="button" (click)="busqueda.set(''); tipoFiltro.set('todos')">Limpiar filtros</button>
+        <button class="btn btn--primary" type="button" (click)="openModal()">+ Nuevo Proveedor</button>
+      </div>
+    </header>
+
+    <section class="filtros card">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div>
+          <label>
+            Buscar por
+            <select [ngModel]="campoBusqueda()" (ngModelChange)="campoBusqueda.set($event)">
+              <option value="razonSocial">Razón Social</option>
+              <option value="documento">Documento</option>
+              <option value="email">Email</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
+            Buscar
+            <input type="text" placeholder="Escribe para buscar..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Estado
+            <select [ngModel]="tipoFiltro()" (ngModelChange)="tipoFiltro.set($event)">
+              <option value="todos">Todos</option>
+              <option value="activo">Activos</option>
+              <option value="inactivo">Inactivos</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="tabla" aria-label="Lista de proveedores">
+      <ng-container *ngIf="filtered().length; else vacio">
+        <div class="table card">
+          <div class="row header">
+            <div>Documento</div>
+            <div>Razón Social</div>
+            <div>Contacto</div>
+            <div>Estado</div>
+            <div>Fecha Registro</div>
+            <div>Acciones</div>
+          </div>
+          <div class="row" *ngFor="let p of filtered(); let i = index" [class.alt]="i % 2 === 1">
+            <div>
+              <div style="font-weight: 600;">{{ p.tipoDocumento }}</div>
+              <div class="muted" style="font-size: 0.875rem;">{{ p.numeroDocumento }}</div>
+            </div>
+            <div>
+              <div style="font-weight: 600;">{{ p.razonSocial }}</div>
+              <div class="muted" style="font-size: 0.875rem;" *ngIf="p.nombreComercial">{{ p.nombreComercial }}</div>
+            </div>
+            <div>
+              <div *ngIf="p.contacto" style="font-weight: 500;">👤 {{ p.contacto }}</div>
+              <div *ngIf="p.telefono" class="muted" style="font-size: 0.875rem;">📞 {{ p.telefono }}</div>
+              <div *ngIf="p.email" class="muted" style="font-size: 0.875rem;">✉️ {{ p.email }}</div>
+              <div *ngIf="p.direccion" class="muted" style="font-size: 0.875rem;">📍 {{ p.direccion }}</div>
+            </div>
+            <div>
+              <span class="badge" [class.badge--success]="p.estado === 'activo'" [class.badge--muted]="p.estado === 'inactivo'">
+                {{ p.estado === 'activo' ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+            <div class="muted" style="font-size: 0.875rem;">{{ p.fechaRegistro }}</div>
+            <div class="acciones-row" style="display: flex; gap: 8px;">
+              <button class="btn btn--secondary" type="button" (click)="openModal(p)">Editar</button>
+              <button class="btn btn--danger" type="button" (click)="deleteProveedor(p.id)">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #vacio>
+        <div class="callout" role="status">No hay proveedores que coincidan con la búsqueda.</div>
+      </ng-template>
+    </section>
+  </main>
+</section>
+
+<div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingProveedor() ? 'Editar Proveedor' : 'Nuevo Proveedor' }}</h2>
+      <button class="btn btn--secondary" type="button" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+        <div>
+          <label>
+            Tipo de Documento
+            <select [ngModel]="formData().tipoDocumento" (ngModelChange)="updateFormField('tipoDocumento', $event)">
+              <option value="RUC">RUC</option>
+              <option value="DNI">DNI</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <label>
+            Número de Documento *
+            <input type="text" [ngModel]="formData().numeroDocumento" (ngModelChange)="updateFormField('numeroDocumento', $event)" required />
+          </label>
+        </div>
+        <div>
+          <label>
+            Razón Social *
+            <input type="text" [ngModel]="formData().razonSocial" (ngModelChange)="updateFormField('razonSocial', $event)" required />
+          </label>
+        </div>
+        <div>
+          <label>
+            Nombre Comercial
+            <input type="text" [ngModel]="formData().nombreComercial" (ngModelChange)="updateFormField('nombreComercial', $event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Contacto
+            <input type="text" [ngModel]="formData().contacto" (ngModelChange)="updateFormField('contacto', $event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Teléfono
+            <input type="text" [ngModel]="formData().telefono" (ngModelChange)="updateFormField('telefono', $event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Email
+            <input type="email" [ngModel]="formData().email" (ngModelChange)="updateFormField('email', $event)" />
+          </label>
+        </div>
+        <div>
+          <label>
+            Estado
+            <select [ngModel]="formData().estado" (ngModelChange)="updateFormField('estado', $event)">
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
+            </select>
+          </label>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label>
+            Dirección
+            <input type="text" [ngModel]="formData().direccion" (ngModelChange)="updateFormField('direccion', $event)" />
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" type="button" (click)="closeModal()">Cancelar</button>
+      <button class="btn btn--primary" type="button" (click)="saveProveedor()">Guardar</button>
+    </div>
+  </div>
+</div>

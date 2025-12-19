@@ -1,0 +1,23 @@
+<div class="notification-container" aria-live="polite" aria-atomic="true">
+  <div 
+    *ngFor="let notif of notifications()" 
+    class="notification"
+    [class.notification--success]="notif.type === 'success'"
+    [class.notification--error]="notif.type === 'error'"
+    [class.notification--warning]="notif.type === 'warning'"
+    [class.notification--info]="notif.type === 'info'"
+    role="alert">
+    <div class="notification__icon">{{ getIcon(notif.type) }}</div>
+    <div class="notification__content">
+      <div class="notification__title">{{ notif.title }}</div>
+      <div class="notification__message" *ngIf="notif.message">{{ notif.message }}</div>
+    </div>
+    <button 
+      class="notification__close" 
+      (click)="remove(notif.id)"
+      aria-label="Cerrar notificación">
+      ✕
+    </button>
+  </div>
+</div>
+

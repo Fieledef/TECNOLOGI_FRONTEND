@@ -1,0 +1,116 @@
+<section class="layout" aria-label="Gestión de Almacenes">
+  <app-sidebar></app-sidebar>
+  <main class="content">
+    <header class="header">
+      <div>
+        <h1>🏪 Gestión de Almacenes</h1>
+        <small class="muted">Visualización y control de inventario por almacén</small>
+      </div>
+    </header>
+
+    <section class="filtros card">
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: end;">
+        <label>
+          <span>🔍 Buscar producto</span>
+          <input 
+            type="text" 
+            placeholder="Buscar por nombre o código interno..." 
+            [ngModel]="busqueda()" 
+            (ngModelChange)="busqueda.set($event)"
+            aria-label="Campo de búsqueda de productos" />
+        </label>
+        <div class="stats-card">
+          <div class="stat-item">
+            <span class="stat-label">Productos</span>
+            <span class="stat-value">{{ getTotalProductos() }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Stock Total</span>
+            <span class="stat-value">{{ getTotalStock() }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="almacenes-section">
+      <div class="almacenes-tabs">
+        <button 
+          *ngFor="let almacen of almacenes()"
+          class="tab-btn"
+          [class.active]="almacenSeleccionado() === almacen.id"
+          (click)="seleccionarAlmacen(almacen.id)"
+          type="button">
+          <span class="tab-icon">🏪</span>
+          <span class="tab-name">{{ almacen.nombre }}</span>
+          <span class="tab-count">{{ getProductosEnAlmacen(almacen.id).length }}</span>
+        </button>
+      </div>
+
+      <div class="almacen-content" *ngIf="almacenSeleccionado()">
+        <div class="almacen-header-section">
+          <div>
+            <h2>{{ nombreAlmacenSeleccionado() }}</h2>
+            <p class="almacen-subtitle">Código: {{ codigoAlmacenSeleccionado() }}</p>
+          </div>
+          <div class="almacen-stats">
+            <div class="stat-card">
+              <span class="stat-icon">📦</span>
+              <div>
+                <span class="stat-number">{{ getTotalProductos() }}</span>
+                <span class="stat-text">Productos</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">📊</span>
+              <div>
+                <span class="stat-number">{{ getTotalStock() }}</span>
+                <span class="stat-text">Stock Total</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="productos-almacen-table" *ngIf="productosDelAlmacenSeleccionado().length > 0; else almacenVacio">
+          <div class="table card">
+            <div class="row header">
+              <div>Código</div>
+              <div>Nombre</div>
+              <div>Unidad</div>
+              <div>Stock</div>
+              <div>Precio</div>
+              <div>Almacenes</div>
+            </div>
+            <div class="row" *ngFor="let p of productosDelAlmacenSeleccionado(); let i = index" [class.alt]="i % 2 === 1">
+              <div class="row-code">
+                <span class="code-value">{{ p.codigoInterno }}</span>
+              </div>
+              <div class="row-name">
+                <span class="name-value">{{ p.nombre }}</span>
+              </div>
+              <div>{{ p.unidad }}</div>
+              <div class="row-stock">
+                <span class="stock-value">{{ p.stockEnAlmacen }}</span>
+              </div>
+              <div class="row-price">
+                <span class="price-value">S/ {{ p.precio1 | number:'1.2-2' }}</span>
+              </div>
+              <div class="row-almacenes">
+                <span class="almacenes-badge" *ngFor="let item of getAlmacenesDeProducto(p.id!)">
+                  {{ item.almacen.nombre }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ng-template #almacenVacio>
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>Almacén vacío</h3>
+            <p>Este almacén no tiene productos asignados o no hay productos que coincidan con la búsqueda.</p>
+          </div>
+        </ng-template>
+      </div>
+    </section>
+  </main>
+</section>
+

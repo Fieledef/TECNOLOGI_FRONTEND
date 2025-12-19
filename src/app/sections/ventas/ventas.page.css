@@ -1,0 +1,130 @@
+@import '../../shared/shared.css';
+
+.header-stats {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.filtros {
+  margin-bottom: 24px;
+}
+
+.tabla {
+  margin-top: 24px;
+}
+
+.table .row {
+  grid-template-columns: 1.2fr 1fr 2fr 1fr 0.8fr 1fr 1fr 1.2fr 1fr auto;
+  font-size: 0.875rem;
+}
+
+.table .row.header {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+}
+
+.btn--small {
+  padding: 8px 16px;
+  min-height: 36px;
+  font-size: 0.8125rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+}
+
+.modal.modal-lg {
+  max-width: 900px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  border-bottom: 2px solid var(--border);
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.modal-body {
+  padding: 28px;
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 28px;
+  border-top: 2px solid var(--border);
+  background: var(--surface);
+}
+
+@media (max-width: 960px) {
+  .table .row {
+    grid-template-columns: 1fr 1fr 1.5fr 0.8fr 0.8fr 1fr 1fr 1.2fr 1fr auto;
+  }
+}

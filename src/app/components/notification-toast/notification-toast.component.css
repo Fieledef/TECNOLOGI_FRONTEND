@@ -1,0 +1,140 @@
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border-left: 4px solid;
+  pointer-events: auto;
+  animation: slideInRight 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification--success {
+  border-left-color: var(--success);
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%);
+}
+
+.notification--error {
+  border-left-color: var(--danger);
+  background: linear-gradient(135deg, #ffffff 0%, #ffebee 100%);
+}
+
+.notification--warning {
+  border-left-color: var(--warning);
+  background: linear-gradient(135deg, #ffffff 0%, #fff3e0 100%);
+}
+
+.notification--info {
+  border-left-color: var(--info);
+  background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+}
+
+.notification__icon {
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.notification--success .notification__icon {
+  color: var(--success);
+}
+
+.notification--error .notification__icon {
+  color: var(--danger);
+}
+
+.notification--warning .notification__icon {
+  color: var(--warning);
+}
+
+.notification--info .notification__icon {
+  color: var(--info);
+}
+
+.notification__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification__title {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+
+.notification__message {
+  font-size: 0.875rem;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+
+.notification__close {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.notification__close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--fg);
+}
+
+@media (max-width: 640px) {
+  .notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .notification {
+    padding: 14px 16px;
+  }
+}
+
