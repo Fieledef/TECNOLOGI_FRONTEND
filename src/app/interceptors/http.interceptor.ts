@@ -46,14 +46,17 @@ export const httpInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       // Manejar diferentes tipos de errores
       if (error.status === 401) {
-        // No autenticado
-        authService.logout();
-        localStorage.removeItem('token');
-        notificationService.error(
-          'Sesión expirada',
-          'Por favor, inicia sesión nuevamente'
-        );
-        router.navigate(['/login']);
+        // No autenticado - solo redirigir si no estamos ya en login
+        if (!router.url.includes('/login')) {
+          authService.logout();
+          notificationService.error(
+            'Sesión expirada',
+            'Por favor, inicia sesión nuevamente'
+          );
+          router.navigate(['/login'], {
+            queryParams: { returnUrl: router.url }
+          });
+        }
       } else if (error.status === 403) {
         // Sin permisos
         notificationService.error(

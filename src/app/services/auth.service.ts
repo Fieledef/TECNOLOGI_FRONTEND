@@ -15,14 +15,29 @@ export class AuthService {
   private currentUser = signal<User | null>(null);
 
   constructor() {
-    // Por defecto, simular un usuario administrador
-    // En producción, esto se obtendría del token JWT o sesión
-    this.currentUser.set({
-      id: '1',
-      nombre: 'Administrador',
-      email: 'admin@sistema.com',
-      rol: 'admin'
-    });
+    // Intentar cargar usuario desde localStorage o token
+    this.loadUserFromStorage();
+  }
+
+  private loadUserFromStorage() {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.currentUser.set(user);
+      } catch (e) {
+        // Si hay error, limpiar
+        this.clearStorage();
+      }
+    }
+  }
+
+  private clearStorage() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    this.currentUser.set(null);
   }
 
   // Obtener usuario actual
@@ -68,22 +83,17 @@ export class AuthService {
     this.currentUser.set(user);
   }
 
-  // Simular login (en producción esto haría una petición al backend)
-  login(email: string, password: string, rol: UserRole = 'admin'): boolean {
-    // Aquí normalmente harías una petición al backend
-    // Por ahora simulamos el login
-    this.currentUser.set({
-      id: '1',
-      nombre: email.split('@')[0],
-      email,
-      rol
-    });
-    return true;
-  }
-
   // Cerrar sesión
   logout() {
+    this.clearStorage();
     this.currentUser.set(null);
+  }
+
+  // Guardar usuario (llamado después de login exitoso)
+  setUserFromLogin(user: User, token: string) {
+    this.currentUser.set(user);
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
   }
 }
 

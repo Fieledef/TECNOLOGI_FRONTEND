@@ -109,7 +109,29 @@
         <div>
           <label>
             Número de Documento *
-            <input type="text" [ngModel]="formData().numeroDocumento" (ngModelChange)="updateFormField('numeroDocumento', $event)" required />
+            <div class="documento-input-wrapper">
+              <input 
+                type="text" 
+                [ngModel]="formData().numeroDocumento" 
+                (ngModelChange)="validarDNI(); updateFormField('numeroDocumento', $event)"
+                [placeholder]="formData().tipoDocumento === 'DNI' ? '12345678' : '20123456789'"
+                [maxlength]="formData().tipoDocumento === 'DNI' ? 8 : 11"
+                required />
+              <button
+                *ngIf="(formData().tipoDocumento === 'DNI' || formData().tipoDocumento === 'RUC') && formData().numeroDocumento"
+                type="button"
+                class="btn-sunat"
+                [disabled]="buscandoSunat()"
+                (click)="buscarEnSunat()"
+                [title]="'Buscar datos en SUNAT'"
+                aria-label="Buscar datos en SUNAT">
+                <span *ngIf="!buscandoSunat()">🔍 Buscar SUNAT</span>
+                <span *ngIf="buscandoSunat()">⏳ Buscando...</span>
+              </button>
+            </div>
+            <small class="sunat-hint" *ngIf="formData().tipoDocumento === 'DNI' || formData().tipoDocumento === 'RUC'">
+              Ingresa el {{ formData().tipoDocumento }} y haz clic en "Buscar SUNAT" para obtener los datos automáticamente
+            </small>
           </label>
         </div>
         <div>

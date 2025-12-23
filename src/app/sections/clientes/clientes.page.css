@@ -61,3 +61,69 @@
 .tabla {
   margin-top: 24px;
 }
+
+/* Estilos para búsqueda SUNAT */
+.documento-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.documento-input-wrapper input {
+  flex: 1;
+}
+
+.btn-sunat {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #2d7d32 0%, #1b5e20 100%);
+  border: none;
+  border-radius: var(--radius);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(45, 125, 50, 0.3);
+}
+
+.btn-sunat:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1b5e20 0%, #2d7d32 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45, 125, 50, 0.4);
+}
+
+.btn-sunat:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-sunat:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  background: var(--surface);
+  color: var(--fg-muted);
+}
+
+.sunat-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .documento-input-wrapper {
+    flex-direction: column;
+  }
+
+  .btn-sunat {
+    width: 100%;
+  }
+}
