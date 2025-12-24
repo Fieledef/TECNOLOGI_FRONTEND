@@ -238,35 +238,6 @@
   text-decoration: underline;
 }
 
-/* Dev login (solo para desarrollo) */
-.dev-login {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 2px dashed var(--border);
-}
-
-.dev-label {
-  font-size: 0.75rem;
-  color: var(--fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.dev-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.dev-buttons .btn {
-  flex: 1;
-  min-width: 80px;
-}
-
 @media (max-width: 640px) {
   .login-card {
     padding: 32px 24px;
@@ -286,13 +257,6 @@
     align-items: flex-start;
     gap: 12px;
   }
-
-  .dev-buttons {
-    flex-direction: column;
-  }
-
-  .dev-buttons .btn {
-    width: 100%;
-  }
 }
+
 

@@ -3,7 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export type UserRole = 'admin' | 'vendedor' | 'almacen' | 'contador';
 
 export interface User {
-  id: string;
+  user_id: number;
   nombre: string;
   email: string;
   rol: UserRole;
@@ -11,7 +11,9 @@ export interface User {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  // Simulación de usuario actual (en producción esto vendría del backend)
+
+  private api_url = 'http://localhost:3000/apiTS';
+
   private currentUser = signal<User | null>(null);
 
   constructor() {
@@ -22,7 +24,7 @@ export class AuthService {
   private loadUserFromStorage() {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
-    
+
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
@@ -78,15 +80,30 @@ export class AuthService {
     return this.hasAnyRole(['admin', 'almacen']);
   }
 
-  // Simular cambio de usuario (para testing)
-  setUser(user: User | null) {
-    this.currentUser.set(user);
-  }
-
   // Cerrar sesión
   logout() {
     this.clearStorage();
     this.currentUser.set(null);
+  }
+
+
+  // Método de login que consume el backend
+  async login(correo: string, password: string): Promise<{ access_token: string; user: User }> {
+    const response = await fetch(`${this.api_url}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ correo, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Error de autenticación' }));
+      throw new Error(error.message || 'Credenciales inválidas');
+    }
+
+    const data = await response.json();
+    return data;
   }
 
   // Guardar usuario (llamado después de login exitoso)

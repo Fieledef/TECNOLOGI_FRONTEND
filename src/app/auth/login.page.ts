@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 import { LoadingService } from '../services/loading.service';
-import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-login-page',
@@ -19,7 +19,7 @@ export class LoginPage {
   private router = inject(Router);
   private notifications = inject(NotificationService);
   private loading = inject(LoadingService);
-  private http = inject(HttpClient);
+
 
   email = signal('');
   password = signal('');
@@ -49,53 +49,39 @@ export class LoginPage {
     try {
       this.loading.start();
 
-      // Petición al backend
-      const response = await this.http.post<{
-        token: string;
-        user: {
-          id: string;
-          nombre: string;
-          email: string;
-          rol: string;
-        };
-      }>('/api/auth/login', {
-        email,
-        password
-      }).toPromise();
+      // Llamar al método login del AuthService
+      const response = await this.auth.login(email, password);
 
-      if (response) {
-        // Guardar token y usuario
-        const user = {
-          id: response.user.id,
-          nombre: response.user.nombre,
-          email: response.user.email,
-          rol: response.user.rol as any
-        };
-        
-        this.auth.setUserFromLogin(user, response.token);
-        
-        // Si rememberMe está activado, guardar también
-        if (this.rememberMe()) {
-          localStorage.setItem('rememberMe', 'true');
-        }
+      // Guardar token y usuario
+      const user = {
+        user_id: response.user.user_id,
+        nombre: response.user.nombre,
+        email: response.user.email,
+        rol: response.user.rol as any
+      };
 
-        this.notifications.success(
-          'Bienvenido',
-          `Hola ${response.user.nombre}`
-        );
+      this.auth.setUserFromLogin(user, response.access_token);
 
-        // Redirigir a la página principal
-        this.router.navigate(['/']);
+      // Si rememberMe está activado, guardar también
+      if (this.rememberMe()) {
+        localStorage.setItem('rememberMe', 'true');
       }
+
+      this.notifications.success(
+        'Bienvenido',
+        `Hola ${response.user.nombre}`
+      );
+
+      // Redirigir a la página principal
+      this.router.navigate(['/']);
     } catch (error: any) {
-      // El interceptor ya maneja los errores HTTP, pero podemos agregar un mensaje específico
-      if (error.status === 401) {
+      // Manejar errores de autenticación
+      if (error.message) {
         this.notifications.error(
-          'Credenciales incorrectas',
-          'El email o contraseña son incorrectos'
+          'Error de autenticación',
+          error.message
         );
-      } else if (!error.status) {
-        // Error de red
+      } else {
         this.notifications.error(
           'Error de conexión',
           'No se pudo conectar con el servidor. Verifica tu conexión.'
@@ -114,11 +100,6 @@ export class LoginPage {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
-
-  // Para desarrollo: login rápido (eliminar en producción)
-  quickLogin(rol: 'admin' | 'vendedor' | 'almacen' | 'contador' = 'admin') {
-    this.email.set(`${rol}@sistema.com`);
-    this.password.set('password123');
-  }
 }
+
 
