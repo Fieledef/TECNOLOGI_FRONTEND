@@ -7,7 +7,8 @@
         <small class="muted">Gestión de clientes y contactos</small>
       </div>
       <div class="acciones">
-        <button class="btn btn--secondary" type="button" (click)="busqueda.set(''); tipoFiltro.set('todos')">Limpiar filtros</button>
+        <button class="btn btn--secondary" type="button" (click)="busqueda.set(''); tipoFiltro.set('todos')">Limpiar
+          filtros</button>
         <button class="btn btn--primary" type="button" (click)="openModal()">+ Nuevo Cliente</button>
       </div>
     </header>
@@ -27,7 +28,8 @@
         <div>
           <label>
             Buscar
-            <input type="text" placeholder="Escribe para buscar..." [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" />
+            <input type="text" placeholder="Escribe para buscar..." [ngModel]="busqueda()"
+              (ngModelChange)="busqueda.set($event)" />
           </label>
         </div>
         <div>
@@ -69,11 +71,12 @@
               <div *ngIf="c.direccion" class="muted" style="font-size: 0.875rem;">📍 {{ c.direccion }}</div>
             </div>
             <div>
-              <span class="badge" [class.badge--success]="c.estado === 'activo'" [class.badge--muted]="c.estado === 'inactivo'">
+              <span class="badge" [class.badge--success]="c.estado === 'activo'"
+                [class.badge--muted]="c.estado === 'inactivo'">
                 {{ c.estado === 'activo' ? 'Activo' : 'Inactivo' }}
               </span>
             </div>
-            <div class="muted" style="font-size: 0.875rem;">{{ c.fechaRegistro }}</div>
+            <div class="muted" style="font-size: 0.875rem;">{{ c.fechaRegistro | date:'dd/MM/yyyy' }}</div>
             <div class="acciones-row" style="display: flex; gap: 8px;">
               <button class="btn btn--secondary" type="button" (click)="openModal(c)">Editar</button>
               <button class="btn btn--danger" type="button" (click)="deleteCliente(c.id)">Eliminar</button>
@@ -110,40 +113,36 @@
           <label>
             Número de Documento *
             <div class="documento-input-wrapper">
-              <input 
-                type="text" 
-                [ngModel]="formData().numeroDocumento" 
+              <input type="text" [ngModel]="formData().numeroDocumento"
                 (ngModelChange)="validarDNI(); updateFormField('numeroDocumento', $event)"
                 [placeholder]="formData().tipoDocumento === 'DNI' ? '12345678' : '20123456789'"
-                [maxlength]="formData().tipoDocumento === 'DNI' ? 8 : 11"
-                required />
+                [maxlength]="formData().tipoDocumento === 'DNI' ? 8 : 11" required />
               <button
                 *ngIf="(formData().tipoDocumento === 'DNI' || formData().tipoDocumento === 'RUC') && formData().numeroDocumento"
-                type="button"
-                class="btn-sunat"
-                [disabled]="buscandoSunat()"
-                (click)="buscarEnSunat()"
-                [title]="'Buscar datos en SUNAT'"
-                aria-label="Buscar datos en SUNAT">
+                type="button" class="btn-sunat" [disabled]="buscandoSunat()" (click)="buscarEnSunat()"
+                [title]="'Buscar datos en SUNAT'" aria-label="Buscar datos en SUNAT">
                 <span *ngIf="!buscandoSunat()">🔍 Buscar SUNAT</span>
                 <span *ngIf="buscandoSunat()">⏳ Buscando...</span>
               </button>
             </div>
             <small class="sunat-hint" *ngIf="formData().tipoDocumento === 'DNI' || formData().tipoDocumento === 'RUC'">
-              Ingresa el {{ formData().tipoDocumento }} y haz clic en "Buscar SUNAT" para obtener los datos automáticamente
+              Ingresa el {{ formData().tipoDocumento }} y haz clic en "Buscar SUNAT" para obtener los datos
+              automáticamente
             </small>
           </label>
         </div>
         <div>
           <label>
             Nombre *
-            <input type="text" [ngModel]="formData().nombre" (ngModelChange)="updateFormField('nombre', $event)" required />
+            <input type="text" [ngModel]="formData().nombre" (ngModelChange)="updateFormField('nombre', $event)"
+              required />
           </label>
         </div>
         <div *ngIf="formData().tipoDocumento === 'RUC'">
           <label>
             Razón Social
-            <input type="text" [ngModel]="formData().razonSocial" (ngModelChange)="updateFormField('razonSocial', $event)" />
+            <input type="text" [ngModel]="formData().razonSocial"
+              (ngModelChange)="updateFormField('razonSocial', $event)" />
           </label>
         </div>
         <div>
@@ -161,7 +160,8 @@
         <div style="grid-column: 1 / -1;">
           <label>
             Dirección
-            <input type="text" [ngModel]="formData().direccion" (ngModelChange)="updateFormField('direccion', $event)" />
+            <input type="text" [ngModel]="formData().direccion"
+              (ngModelChange)="updateFormField('direccion', $event)" />
           </label>
         </div>
         <div>

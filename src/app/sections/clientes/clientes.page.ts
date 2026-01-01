@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { SidebarComponent } from '../../shared/sidebar.component';
-import { DataService, Cliente } from '../../services/data.service';
+import { Cliente } from '../../services/data.service';
 import { NotificationService } from '../../services/notification.service';
 import { LoadingService } from '../../services/loading.service';
+import { ClientesService } from '../../services/clientes.service';
 
 @Component({
   selector: 'app-clientes-page',
@@ -14,13 +14,12 @@ import { LoadingService } from '../../services/loading.service';
   templateUrl: './clientes.page.html',
   styleUrls: ['./clientes.page.css']
 })
-export class ClientesPage {
-  private data = inject(DataService);
-  private http = inject(HttpClient);
+export class ClientesPage implements OnInit {
+  private clientesService = inject(ClientesService);
   private notifications = inject(NotificationService);
   private loading = inject(LoadingService);
 
-  clientes = signal<Cliente[]>(this.data.getClientes());
+  clientes = signal<Cliente[]>([]);
   busqueda = signal('');
   tipoFiltro = signal<'todos' | 'activo' | 'inactivo'>('todos');
   campoBusqueda = signal<'nombre' | 'documento' | 'email'>('nombre');
@@ -39,6 +38,42 @@ export class ClientesPage {
     email: '',
     estado: 'activo'
   });
+
+  ngOnInit() {
+    this.loadClientes();
+  }
+
+  loadClientes() {
+    this.loading.start();
+    this.clientesService.findAll().subscribe({
+      next: (data) => {
+        // Mapear datos del backend (snake_case) al frontend (camelCase)
+        const response = data as any;
+        const backendData = response.data || [];
+        console.log('Backend Data:', backendData);
+
+        const mappedData = backendData.map((cliente: any) => ({
+          id: cliente.cliente_id,
+          tipoDocumento: cliente.tipo_documento,
+          numeroDocumento: cliente.numero_documento?.toString(),
+          nombre: cliente.nombre,
+          razonSocial: cliente.razon_social,
+          direccion: cliente.direccion,
+          telefono: cliente.telefono,
+          email: cliente.email,
+          estado: cliente.estado === 1 || cliente.estado === '1' ? 'activo' : 'inactivo',
+          fechaRegistro: cliente.created_at
+        }));
+        this.clientes.set(mappedData);
+        this.loading.stop();
+      },
+      error: (err) => {
+        console.error('Error cargando clientes', err);
+        this.notifications.error('Error', 'No se pudieron cargar los clientes');
+        this.loading.stop();
+      }
+    });
+  }
 
   filtered = computed(() => {
     const term = this.busqueda().trim().toLowerCase();
@@ -83,7 +118,7 @@ export class ClientesPage {
 
   saveCliente() {
     const form = this.formData();
-    
+
     // Validaciones mejoradas
     if (!form.numeroDocumento?.trim()) {
       this.notifications.error('Documento requerido', 'El número de documento es obligatorio');
@@ -95,56 +130,78 @@ export class ClientesPage {
       return;
     }
 
-    try {
-      this.loading.start();
+    this.loading.start();
 
-      if (this.editingCliente()) {
-        this.data.updateCliente(this.editingCliente()!.id, form);
-        this.clientes.set(this.data.getClientes());
-        this.notifications.success(
-          'Cliente actualizado',
-          `El cliente "${form.nombre}" ha sido actualizado correctamente`
-        );
-      } else {
-        this.data.addCliente(form as Omit<Cliente, 'id' | 'fechaRegistro'>);
-        this.clientes.set(this.data.getClientes());
-        this.notifications.success(
-          'Cliente creado',
-          `El cliente "${form.nombre}" ha sido creado correctamente`
-        );
-      }
-      this.closeModal();
-    } catch (error) {
-      this.notifications.error(
-        'Error al guardar',
-        'No se pudo guardar el cliente. Por favor, intenta nuevamente.'
-      );
-    } finally {
-      this.loading.stop();
+    // Mapear datos del frontend (camelCase) al backend (snake_case)
+    const dataToSend = {
+      tipo_documento: form.tipoDocumento,
+      numero_documento: form.numeroDocumento, // Enviar como string
+      nombre: form.nombre,
+      razon_social: form.razonSocial || undefined,
+      direccion: form.direccion || undefined,
+      telefono: form.telefono || undefined,
+      email: form.email || undefined,
+      estado: form.estado === 'activo' ? 1 : 0
+    };
+
+    if (this.editingCliente()) {
+      this.clientesService.update(this.editingCliente()!.id, dataToSend).subscribe({
+        next: () => {
+          this.loadClientes();
+          this.notifications.success(
+            'Cliente actualizado',
+            `El cliente "${form.nombre}" ha sido actualizado correctamente`
+          );
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error actualizando cliente', err);
+          this.notifications.error('Error al guardar', 'No se pudo actualizar el cliente.');
+          this.loading.stop();
+        },
+        complete: () => this.loading.stop()
+      });
+    } else {
+      this.clientesService.create(dataToSend).subscribe({
+        next: () => {
+          this.loadClientes();
+          this.notifications.success(
+            'Cliente creado',
+            `El cliente "${form.nombre}" ha sido creado correctamente`
+          );
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error creando cliente', err);
+          this.notifications.error('Error al guardar', 'No se pudo crear el cliente.');
+          this.loading.stop();
+        },
+        complete: () => this.loading.stop()
+      });
     }
   }
 
   deleteCliente(id: string) {
     const cliente = this.clientes().find(c => c.id === id);
     const nombre = cliente?.nombre || 'este cliente';
-    
+
     if (confirm(`¿Está seguro de eliminar el cliente "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
-      try {
-        this.loading.start();
-        this.data.deleteCliente(id);
-        this.clientes.set(this.data.getClientes());
-        this.notifications.success(
-          'Cliente eliminado',
-          `El cliente "${nombre}" ha sido eliminado correctamente`
-        );
-      } catch (error) {
-        this.notifications.error(
-          'Error al eliminar',
-          'No se pudo eliminar el cliente. Por favor, intenta nuevamente.'
-        );
-      } finally {
-        this.loading.stop();
-      }
+      this.loading.start();
+      this.clientesService.remove(id).subscribe({
+        next: () => {
+          this.loadClientes();
+          this.notifications.success(
+            'Cliente eliminado',
+            `El cliente "${nombre}" ha sido eliminado correctamente`
+          );
+        },
+        error: (err) => {
+          console.error('Error eliminando cliente', err);
+          this.notifications.error('Error al eliminar', 'No se pudo eliminar el cliente.');
+          this.loading.stop();
+        },
+        complete: () => this.loading.stop()
+      });
     }
   }
 
@@ -152,7 +209,7 @@ export class ClientesPage {
     this.formData.update(d => ({ ...d, [field]: value }));
   }
 
-  async buscarEnSunat() {
+  buscarEnSunat() {
     const tipoDocumento = this.formData().tipoDocumento;
     const numeroDocumento = this.formData().numeroDocumento?.trim();
 
@@ -191,60 +248,57 @@ export class ClientesPage {
       return;
     }
 
-    try {
-      this.buscandoSunat.set(true);
-      this.loading.start();
+    this.buscandoSunat.set(true);
+    this.loading.start();
 
-      // Petición al backend - el backend se conectará con SUNAT
-      const response = await this.http.get<{
-        nombre?: string;
-        razonSocial?: string;
-        direccion?: string;
-        estado?: string;
-        condicion?: string;
-        distrito?: string;
-        provincia?: string;
-        departamento?: string;
-      }>(`/api/clientes/sunat/${tipoDocumento}/${numeroDocumento}`).toPromise();
+    this.clientesService.consultarSunat(tipoDocumento, numeroDocumento).subscribe({
+      next: (response) => {
+        if (response && response.success) {
+          const data = response.data;
 
-      if (response) {
-        // Actualizar formulario con los datos obtenidos
-        this.formData.update(d => ({
-          ...d,
-          nombre: response.nombre || d.nombre || '',
-          razonSocial: response.razonSocial || d.razonSocial || '',
-          direccion: response.direccion || 
-                     (response.distrito && response.provincia && response.departamento 
-                       ? `${response.distrito}, ${response.provincia}, ${response.departamento}`
-                       : d.direccion || '')
-        }));
+          if (tipoDocumento === 'DNI') {
+            const nombreCompleto = data.nombre_completo || `${data.nombres} ${data.apellido_paterno} ${data.apellido_materno}`;
+            this.formData.update(d => ({
+              ...d,
+              nombre: nombreCompleto,
+            }));
+          } else if (tipoDocumento === 'RUC') {
+            this.formData.update(d => ({
+              ...d,
+              nombre: data.nombre_o_razon_social,
+              razonSocial: data.nombre_o_razon_social,
+              direccion: data.direccion_completa,
+              estado: data.estado === 'ACTIVO' ? 'activo' : 'inactivo',
+            }));
+          }
 
-        this.notifications.success(
-          'Datos encontrados',
-          `Se encontraron los datos del ${tipoDocumento} ${numeroDocumento}`
-        );
+          this.notifications.success(
+            'Datos encontrados',
+            `Se encontraron los datos del ${tipoDocumento} ${numeroDocumento}`
+          );
+        } else {
+          this.notifications.warning('No encontrado', 'No se encontraron datos válidos.');
+        }
+        this.buscandoSunat.set(false);
+        this.loading.stop();
+      },
+      error: (error) => {
+        console.error('Error buscando en SUNAT:', error);
+        if (error.status === 404) {
+          this.notifications.warning(
+            'No encontrado',
+            `No se encontraron datos en SUNAT para el ${tipoDocumento} ${numeroDocumento}`
+          );
+        } else {
+          this.notifications.error(
+            'Error al consultar SUNAT',
+            error.error?.message || 'No se pudo conectar con el servicio de SUNAT.'
+          );
+        }
+        this.buscandoSunat.set(false);
+        this.loading.stop();
       }
-    } catch (error: any) {
-      if (error.status === 404) {
-        this.notifications.warning(
-          'No encontrado',
-          `No se encontraron datos en SUNAT para el ${tipoDocumento} ${numeroDocumento}`
-        );
-      } else if (error.status === 400) {
-        this.notifications.error(
-          'Error en la búsqueda',
-          error.error?.message || 'El documento ingresado no es válido'
-        );
-      } else {
-        this.notifications.error(
-          'Error al consultar SUNAT',
-          error.error?.message || 'No se pudo conectar con el servicio de SUNAT. Intenta más tarde.'
-        );
-      }
-    } finally {
-      this.buscandoSunat.set(false);
-      this.loading.stop();
-    }
+    });
   }
 
   // Validar DNI mientras se escribe
